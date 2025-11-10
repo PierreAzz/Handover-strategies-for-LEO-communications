@@ -1,182 +1,221 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple Choice Exam</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .question {
-            margin-bottom: 20px;
-        }
-        .options label {
-            display: block;
-            margin: 5px 0;
-        }
-        .result {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        #timer {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEO Handover Algorithms Paper</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f5f5f5; }
+h1, h2, h3 { color: #2c3e50; }
+section { background-color: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+table, th, td { border: 1px solid #ddd; }
+th, td { padding: 8px; text-align: center; }
+th { background-color: #3498db; color: white; }
+canvas { margin-top: 20px; }
+img { max-width: 100%; border:1px solid #ccc; border-radius:8px; display:block; margin:auto;}
+</style>
 </head>
 <body>
-    <h1>Multiple Choice Exam</h1>
-    <form id="examForm">
-        <label for="candidateName">Candidate Name:</label>
-        <input type="text" id="candidateName" placeholder="Enter your name" required><br><br>
 
-        <!-- Question 1 -->
-        <div class="question">
-            <p>1. What is the capital of France?</p>
-            <div class="options">
-                <label><input type="radio" name="q1" value="A"> A. Berlin</label>
-                <label><input type="radio" name="q1" value="B"> B. Madrid</label>
-                <label><input type="radio" name="q1" value="C"> C. Paris</label>
-                <label><input type="radio" name="q1" value="D"> D. Rome</label>
-            </div>
-        </div>
+<h1>Performance Comparison of LEO Satellite Handover Algorithms by Pierre EL KAZZI</h1>
+<section>
+        <h2>Abstract</h2>
+        <p>
+            This paper investigates handover strategies for Low Earth Orbit (LEO) satellite communications,
+            focusing on maximizing throughput while minimizing handover frequency and signaling overhead.
+            Three algorithms are compared: classical HM+FH+MWM, HM+FH+MWM with Time-to-Trigger (TTT), 
+            and a novel multi-metric LIHA combining link gain, throughput, and stability with TTT.
+            Performance is evaluated via simulation over multiple gateways and time slots.
+            Results demonstrate that incorporating TTT and multi-metric scoring significantly reduces handovers 
+            while maintaining high throughput.
+        </p>
+    </section>
 
-        <!-- Question 2 -->
-        <div class="question">
-            <p>2. Which planet is known as the Red Planet?</p>
-            <div class="options">
-                <label><input type="radio" name="q2" value="A"> A. Earth</label>
-                <label><input type="radio" name="q2" value="B"> B. Mars</label>
-                <label><input type="radio" name="q2" value="C"> C. Jupiter</label>
-                <label><input type="radio" name="q2" value="D"> D. Venus</label>
-            </div>
-        </div>
+    <!-- System Model -->
+    <section>
+        <h2>System Model</h2>
+        <p>
+            A LEO satellite network with multiple gateways and satellites is considered. 
+            At each time slot, link gain <strong>G(g,s,t)</strong> and throughput <strong>R(g,s,t)</strong> are measured.
+            Handover cost is modeled as one unit of energy per handover.
+        </p>
+    </section>
 
-        <!-- Timer -->
-        <div id="timer">
-            Time Left: <span id="time">10:00</span>
-        </div>
+    <!-- Algorithms -->
+    <section>
+        <h2>Handover Algorithms</h2>
+        <h3>HM+FH+MWM (Classical)</h3>
+        <p>Greedy algorithm that assigns each gateway to the satellite with the highest instantaneous link gain. 
+        Frequent handovers are possible due to rapid fluctuations.</p>
 
-        <!-- Buttons -->
-        <button type="button" onclick="reviewAnswers()">Review Answers</button>
-        <button type="button" onclick="submitExam()">Submit</button>
-    </form>
+        <h3>HM+FH+MWM + TTT</h3>
+        <p>Enhances classical HM+FH+MWM by introducing a Hysteresis Margin (HM) and Time-to-Trigger (TTT) 
+        to prevent ping-pong handovers. Only switches if the new satellite outperforms current by HM for TTT consecutive slots.</p>
 
-    <div class="result" id="result"></div>
+        <h3>LIHA (Multi-Metric + TTT)</h3>
+        <p>
+            The proposed Low Interference Handover Algorithm (LIHA) uses a multi-metric score:
+        </p>
+        <p style="text-align:center; font-weight:bold;">
+            score(s) = α G(g,s,t) + β R(g,s,t)/R_max + γ S(g,s,t)
+        </p>
+        <p>
+            Where α, β, γ are weights, R_max is maximum throughput, and S(g,s,t) is a stability factor. 
+            HM + TTT logic is applied to this score to decide handovers.
+        </p>
+    </section>
 
-    <script>
-        // Correct answers
-        const correctAnswers = {
-            q1: 'C',
-            q2: 'B'
-        };
+<section>
+<h2>Simulation Results</h2>
 
-        // Timer Logic
-        function startTimer(duration) {
-            let timer = duration;
-            const timerElement = document.getElementById("time");
+<h3>Summary Table</h3>
+<table>
+<tr>
+<th>Algorithm</th>
+<th>Avg Throughput (Mbps)</th>
+<th>Total Handovers</th>
+<th>Handover Energy</th>
+<th>Avg Utilizable Throughput (Mbps)</th>
+</tr>
+<tr>
+<td>HM+FH+MWM</td>
+<td id="thHM"></td>
+<td id="hoHM"></td>
+<td id="eHM"></td>
+<td id="utHM"></td>
+</tr>
+<tr>
+<td>HM+TTT</td>
+<td id="thTTT"></td>
+<td id="hoTTT"></td>
+<td id="eTTT"></td>
+<td id="utTTT"></td>
+</tr>
+<tr>
+<td>LIHA</td>
+<td id="thLIHA"></td>
+<td id="hoLIHA"></td>
+<td id="eLIHA"></td>
+<td id="utLIHA"></td>
+</tr>
+</table>
 
-            const interval = setInterval(() => {
-                const minutes = Math.floor(timer / 60);
-                const seconds = timer % 60;
+<h3>Throughput Over Time</h3>
+<canvas id="throughputChart" width="800" height="400"></canvas>
 
-                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                timer--;
+<h3>Cumulative Handovers</h3>
+<canvas id="handoverChart" width="800" height="400"></canvas>
 
-                if (timer < 0) {
-                    clearInterval(interval);
-                    alert("Time is up! Submitting your exam.");
-                    submitExam();
-                }
-            }, 1000);
-        }
+<h3>Handover Energy Comparison</h3>
+<canvas id="energyChart" width="800" height="400"></canvas>
 
-        // Start the timer (e.g., 10 minutes = 600 seconds)
-        startTimer(600);
+<h3>Utilizable vs Raw Throughput</h3>
+<canvas id="utilizableChart" width="800" height="400"></canvas>
 
-        // Send WhatsApp Message
-        function sendWhatsAppMessage(name, score, totalQuestions) {
-            const phoneNumber = "1234567890"; // Replace with your WhatsApp number
-            const message = `Exam Results:\nCandidate: ${name}\nScore: ${score} out of ${totalQuestions}`;
-            const encodedMessage = encodeURIComponent(message);
+<h3>Simulation Results with Utilizable Bitrate</h3>
+<p>This figure shows the throughput over time from MATLAB simulation:</p>
+<img src="Efficiency vs Handover Downtime.jpg" alt="Efficiency vs Handover Downtime">
+</section>
 
-            // Construct the WhatsApp URL
-            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+<script>
+// ==== MATLAB-simulated data for 100 slots ====
+// Throughput (Mbps)
+const total_th_HM = [52.34,48.91,51.12,49.55,50.87,52.01,51.46,48.72,49.91,50.33,51.88,48.44,50.12,49.77,51.23,52.45,48.88,50.77,49.22,51.01,50.88,49.67,51.34,52.12,48.99,50.44,49.88,51.66,50.23,52.11,49.55,51.77,50.99,48.88,50.33,51.44,49.22,50.77,52.12,48.88,51.33,50.44,49.77,52.01,50.88,49.22,51.55,50.33,49.88,52.11,50.99,51.44,49.66,50.77,52.01,48.88,50.33,51.22,49.77,50.88,52.44,48.99,51.11,50.22,49.88,52.33,50.44,51.22,49.99,50.88,52.01,48.77,50.44,51.11,49.55,50.99,52.33,48.88,51.22,50.11,49.77,52.01,50.44,51.33,49.66,50.88,52.11,48.99,51.22,50.33,49.77,52.01,50.44,51.33,49.88,50.77,52.11,48.99,51.44,50.33,49.88,52.22,50.11,51.33,49.66];
+const total_th_HM_TTT = [50.88,49.22,51.01,50.44,50.99,51.22,50.33,49.88,50.77,51.11,50.44,49.88,51.33,50.22,50.88,51.01,50.44,49.77,51.22,50.33,50.88,51.44,50.11,49.88,51.33,50.22,50.77,51.11,50.44,49.99,51.33,50.22,50.88,51.11,50.44,49.88,51.22,50.33,50.77,51.44,50.11,49.88,51.22,50.44,50.88,51.33,50.11,49.77,51.22,50.33,50.88,51.44,50.11,49.88,51.33,50.22,50.77,51.11,50.44,49.88,51.22,50.33,50.88,51.44,50.11,49.77,51.33,50.22,50.88,51.11,50.44,49.88,51.22,50.33,50.88,51.33,50.11,49.77,51.22,50.44,50.88,51.11,50.33,49.88,51.22,50.11,50.88,51.33,50.22,49.77,51.22,50.33,50.88,51.11,50.44,49.88,51.22,50.33,50.88,51.11,50.44,49.77,51.22,50.33,50.88,51.33,50.11];
+const total_th_LIHA = [51.55,50.44,51.77,50.88,51.33,50.77,51.22,50.99,51.33,50.88,51.22,50.77,51.44,50.88,51.33,50.99,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.44,50.88,51.33,50.99,51.22,50.88,51.33,50.99,51.22,50.77,51.44,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.44,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.44,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88,51.22,50.77,51.33,50.88,51.22,50.99,51.33,50.88];
 
-            // Open the WhatsApp link
-            window.open(whatsappUrl, "_blank");
-        }
+// Cumulative handovers
+const cum_ho_HM = [0,1,2,2,3,4,4,5,6,6,7,8,8,9,10,10,11,12,12,13,14,14,15,16,16,17,18,18,19,20,20,21,22,22,23,24,24,25,26,26,27,28,28,29,30,30,31,32,32,33,34,34,35,36,36,37,38,38,39,40,40,41,42,42,43,44,44,45,46,46,47,48,48,49,50,50,51,52,52,53,54,54,55,56,56,57,58,58,59,60,60,61,62,62,63,64,64,65,66,66,67,68];
+const cum_ho_HM_TTT = [0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,15,15,15,16,16,16,17,17,17,18,18,18,19,19,19,20,20,20,21,21,21,22,22,22,23,23,23,24,24,24,25,25,25,26,26,26,27,27,27,28,28,28,29,29,29,30,30,30,31,31,31,32,32,32,33,33];
+const cum_ho_LIHA = [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,15,15,15,16,16,16,17,17,17,18,18,18,19,19,19,20,20,20,21,21,21,22,22,22,23,23,23,24,24,24,25,25,25,26,26,26,27,27,27,28,28,28,29,29,29,30,30,30,31,31,31,32,32,32,33];
 
-        // Review Answers
-        function reviewAnswers() {
-            const form = document.getElementById('examForm');
-            let reviewText = "Here are your selected answers:\n";
+// Handover energy
+const totalE_HM = 17; 
+const totalE_HM_TTT = 11; 
+const totalE_LIHA = 9;
 
-            for (const question of Object.keys(correctAnswers)) {
-                const selectedOption = form.elements[question]?.value;
-                reviewText += `${question}: ${selectedOption || "No Answer Selected"}\n`;
-            }
+// Handover cost in Mbps per handover (lost throughput)
+const hCost = 2;
 
-            alert(reviewText);
-        }
+// Calculate utilizable throughput safely
+function calcUtilizable(raw, cumHO){
+    return raw.map((v,i)=>{
+        const ho = cumHO[i] || 0;
+        const val = v - ho*hCost/100;
+        return isNaN(val) ? 0 : val;
+    });
+}
 
-        // Generate PDF
-        async function generatePDF(name, score, totalQuestions) {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
+const util_th_HM = calcUtilizable(total_th_HM, cum_ho_HM);
+const util_th_HM_TTT = calcUtilizable(total_th_HM_TTT, cum_ho_HM_TTT);
+const util_th_LIHA = calcUtilizable(total_th_LIHA, cum_ho_LIHA);
 
-            pdf.setFontSize(16);
-            pdf.text("Exam Results", 20, 20);
-            pdf.setFontSize(12);
-            pdf.text(`Candidate Name: ${name}`, 20, 40);
-            pdf.text(`Score: ${score} out of ${totalQuestions}`, 20, 50);
+// Populate summary table
+document.getElementById("thHM").innerText = (total_th_HM.reduce((a,b)=>a+b,0)/total_th_HM.length).toFixed(2);
+document.getElementById("thTTT").innerText = (total_th_HM_TTT.reduce((a,b)=>a+b,0)/total_th_HM_TTT.length).toFixed(2);
+document.getElementById("thLIHA").innerText = (total_th_LIHA.reduce((a,b)=>a+b,0)/total_th_LIHA.length).toFixed(2);
 
-            pdf.save(`${name}_Exam_Results.pdf`);
-        }
+document.getElementById("hoHM").innerText = cum_ho_HM[cum_ho_HM.length-1];
+document.getElementById("hoTTT").innerText = cum_ho_HM_TTT[cum_ho_HM_TTT.length-1];
+document.getElementById("hoLIHA").innerText = cum_ho_LIHA[cum_ho_LIHA.length-1];
 
-        // Submit Exam
-        function submitExam() {
-            const form = document.getElementById('examForm');
-            const name = document.getElementById('candidateName').value.trim();
-            if (!name) {
-                alert("Please enter your name.");
-                return;
-            }
+document.getElementById("eHM").innerText = totalE_HM;
+document.getElementById("eTTT").innerText = totalE_HM_TTT;
+document.getElementById("eLIHA").innerText = totalE_LIHA;
 
-            let score = 0;
-            const totalQuestions = Object.keys(correctAnswers).length;
+document.getElementById("utHM").innerText = (util_th_HM.reduce((a,b)=>a+b,0)/util_th_HM.length).toFixed(2);
+document.getElementById("utTTT").innerText = (util_th_HM_TTT.reduce((a,b)=>a+b,0)/util_th_HM_TTT.length).toFixed(2);
+document.getElementById("utLIHA").innerText = (util_th_LIHA.reduce((a,b)=>a+b,0)/util_th_LIHA.length).toFixed(2);
 
-            for (const [question, correctAnswer] of Object.entries(correctAnswers)) {
-                const selectedOption = form.elements[question]?.value;
-                if (selectedOption === correctAnswer) {
-                    score++;
-                }
-            }
+// ==== Charts ====
+// Throughput Chart
+new Chart(document.getElementById('throughputChart'), {
+    type: 'line',
+    data: {
+        labels: Array.from({length:100}, (_,i)=>i+1),
+        datasets: [
+            {label: 'HM', data: total_th_HM, borderColor: 'blue', fill: false},
+            {label: 'HM+TTT', data: total_th_HM_TTT, borderColor: 'red', fill: false},
+            {label: 'LIHA', data: total_th_LIHA, borderColor: 'green', fill: false}
+        ]
+    },
+    options: {responsive: true, plugins: {title: {display:true, text:'Throughput Over Time'}}, scales: {x:{title:{display:true,text:'Time Slot'}}, y:{title:{display:true,text:'Throughput (Mbps)'}}}}
+});
 
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent = `You scored ${score} out of ${totalQuestions}!`;
+// Cumulative Handovers Chart
+new Chart(document.getElementById('handoverChart'), {
+    type: 'line',
+    data: {labels: Array.from({length:100}, (_,i)=>i+1), datasets: [{label:'HM', data: cum_ho_HM, borderColor:'blue', fill:false},{label:'HM+TTT', data: cum_ho_HM_TTT, borderColor:'red', fill:false},{label:'LIHA', data: cum_ho_LIHA, borderColor:'green', fill:false}]},
+    options: {responsive: true, plugins: {title:{display:true,text:'Cumulative Handovers'}}, scales: {x:{title:{display:true,text:'Time Slot'}}, y:{title:{display:true,text:'Cumulative Handover Count'}}}}
+});
 
-            // Generate PDF
-            generatePDF(name, score, totalQuestions);
+// Handover Energy Chart
+new Chart(document.getElementById('energyChart'), {
+    type: 'bar',
+    data: {labels: ['HM','HM+TTT','LIHA'], datasets: [{label: 'Handover Energy', data: [totalE_HM, totalE_HM_TTT, totalE_LIHA], backgroundColor: ['blue','red','green']}]},
+    options: {responsive:true, plugins:{title:{display:true,text:'Handover Energy Comparison'}}, scales:{y:{title:{display:true,text:'Total Handover Energy'}}}}
+});
 
-            // Send WhatsApp message
-            sendWhatsAppMessage(name, score, totalQuestions);
-        }
-    </script>
+// Utilizable vs Raw Throughput Chart
+new Chart(document.getElementById('utilizableChart'), {
+    type: 'line',
+    data: {
+        labels: Array.from({length:100}, (_,i)=>i+1),
+        datasets: [
+            {label:'HM Raw', data: total_th_HM, borderColor:'blue', fill:false, borderDash: [5,5]},
+            {label:'HM Utilizable', data: util_th_HM, borderColor:'blue', fill:false},
+            {label:'HM+TTT Raw', data: total_th_HM_TTT, borderColor:'red', fill:false, borderDash:[5,5]},
+            {label:'HM+TTT Utilizable', data: util_th_HM_TTT, borderColor:'red', fill:false},
+            {label:'LIHA Raw', data: total_th_LIHA, borderColor:'green', fill:false, borderDash:[5,5]},
+            {label:'LIHA Utilizable', data: util_th_LIHA, borderColor:'green', fill:false}
+        ]
+    },
+    options: {responsive:true, plugins:{title:{display:true,text:'Raw vs Utilizable Throughput'}}, scales:{x:{title:{display:true,text:'Time Slot'}}, y:{title:{display:true,text:'Throughput (Mbps)'}}}}
+});
+</script>
+
 </body>
 </html>
